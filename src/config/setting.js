@@ -68,7 +68,7 @@ export const PHONIC_MAP = {
 export const OPT_TRANBOX_TRIGGER_CLICK = "click";
 export const OPT_TRANBOX_TRIGGER_HOVER = "hover";
 export const OPT_TRANBOX_TRIGGER_SELECT = "select";
-export const OPT_TRANBOX_TRIGGER_CTRL_SELECT = "ctrl-select";
+export const OPT_TRANBOX_TRIGGER_CTRL_SELECT = "ctrl_select";
 export const OPT_TRANBOX_TRIGGER_ALL = [
   OPT_TRANBOX_TRIGGER_CLICK,
   OPT_TRANBOX_TRIGGER_HOVER,
