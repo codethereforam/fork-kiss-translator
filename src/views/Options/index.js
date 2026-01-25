@@ -21,6 +21,7 @@ import Apis from "./Apis";
 import InputSetting from "./InputSetting";
 import Tranbox from "./Tranbox";
 import FavWords from "./FavWords";
+import LookupHistory from "./LookupHistory";
 import Playgound from "./Playground";
 import MouseHoverSetting from "./MouseHover";
 import SubtitleSetting from "./Subtitle";
@@ -127,6 +128,7 @@ export default function Options() {
                   <Route path="apis" element={<Apis />} />
                   <Route path="sync" element={<SyncSetting />} />
                   <Route path="words" element={<FavWords />} />
+                  <Route path="lookup-history" element={<LookupHistory />} />
                   <Route path="playground" element={<Playgound />} />
                   <Route path="about" element={<About />} />
                 </Route>

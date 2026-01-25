@@ -9,6 +9,8 @@ import { useAlert } from "../../hooks/Alert";
 import { isExt } from "../../libs/client";
 import Grid from "@mui/material/Grid";
 import Alert from "@mui/material/Alert";
+import Switch from "@mui/material/Switch";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import {
   UI_LANGS,
   TRANS_NEWLINE_LENGTH,
@@ -108,6 +110,7 @@ export default function Settings() {
     rootMargin = 500,
   } = setting;
   const { isHide = false, fabClickAction = 0 } = fab || {};
+  const { lookupHistory = { enabled: true, maxCount: 50 } } = setting;
 
   return (
     <Box>
@@ -184,6 +187,43 @@ export default function Settings() {
                 <MenuItem value={false}>{i18n("show")}</MenuItem>
                 <MenuItem value={true}>{i18n("hide")}</MenuItem>
               </TextField>
+            </Grid>
+            <Grid item xs={12} sm={12} md={6} lg={3}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={lookupHistory?.enabled ?? true}
+                    onChange={(e) =>
+                      updateSetting({
+                        lookupHistory: {
+                          ...lookupHistory,
+                          enabled: e.target.checked,
+                        },
+                      })
+                    }
+                  />
+                }
+                label={i18n("lookup_history_enabled")}
+              />
+            </Grid>
+            <Grid item xs={12} sm={12} md={6} lg={3}>
+              <TextField
+                fullWidth
+                size="small"
+                type="number"
+                label={i18n("lookup_history_max_count")}
+                value={lookupHistory?.maxCount ?? 50}
+                onChange={(e) => {
+                  const value = Math.max(1, Math.min(1000, parseInt(e.target.value) || 50));
+                  updateSetting({
+                    lookupHistory: {
+                      ...lookupHistory,
+                      maxCount: value,
+                    },
+                  });
+                }}
+                helperText={i18n("lookup_history_max_count_helper")}
+              />
             </Grid>
             <Grid item xs={12} sm={12} md={6} lg={3}>
               <TextField

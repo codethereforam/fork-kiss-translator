@@ -3,11 +3,13 @@ import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import { useI18n } from "../../hooks/I18n";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { apiTranslate } from "../../apis";
 import CopyBtn from "./CopyBtn";
 import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
+import { useLookupHistory } from "../../hooks/LookupHistory";
+import { kissLog } from "../../libs/log";
 
 export default function TranCont({
   text,
@@ -21,10 +23,24 @@ export default function TranCont({
   const [trText, setTrText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { addHistory } = useLookupHistory();
 
   const apiSetting = useMemo(
     () => transApis.find((api) => api.apiSlug === apiSlug),
     [transApis, apiSlug]
+  );
+
+  const handleTranslationComplete = useCallback(
+    (sourceText, translatedText, serviceName) => {
+      if (sourceText && translatedText) {
+        try {
+          addHistory(sourceText, translatedText, serviceName);
+        } catch (err) {
+          kissLog("trancont: add history error", err);
+        }
+      }
+    },
+    [addHistory]
   );
 
   useEffect(() => {
@@ -46,13 +62,14 @@ export default function TranCont({
         });
 
         setTrText(trText);
+        handleTranslationComplete(text, trText, apiSetting.apiName);
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     })();
-  }, [text, fromLang, toLang, apiSetting]);
+  }, [text, fromLang, toLang, apiSetting, handleTranslationComplete]);
 
   if (simpleStyle) {
     return (
