@@ -18,7 +18,6 @@ import MouseIcon from "@mui/icons-material/Mouse";
 import SubtitlesIcon from "@mui/icons-material/Subtitles";
 import FormatColorText from "@mui/icons-material/FormatColorText";
 import BugReportIcon from "@mui/icons-material/BugReport";
-import HistoryIcon from "@mui/icons-material/History";
 
 function LinkItem({ label, url, icon }) {
   const match = useMatch(url);
@@ -92,12 +91,6 @@ export default function Navigator(props) {
       label: i18n("favorite_words"),
       url: "/words",
       icon: <EventNoteIcon />,
-    },
-    {
-      id: "lookup_history",
-      label: i18n("lookup_history"),
-      url: "/lookup-history",
-      icon: <HistoryIcon />,
     },
     {
       id: "playground",

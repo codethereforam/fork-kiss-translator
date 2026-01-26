@@ -214,7 +214,7 @@ export default function Settings() {
                 label={i18n("lookup_history_max_count")}
                 value={lookupHistory?.maxCount ?? 50}
                 onChange={(e) => {
-                  const value = Math.max(1, Math.min(1000, parseInt(e.target.value) || 50));
+                  const value = Math.max(1, Math.min(100000, parseInt(e.target.value) || 50));
                   updateSetting({
                     lookupHistory: {
                       ...lookupHistory,
