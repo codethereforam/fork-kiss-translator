@@ -209,6 +209,15 @@ browser.windows?.onRemoved?.addListener?.(async (windowId) => {
 });
 
 /**
+ * 添加右键菜单项的错误处理回调
+ */
+function handleContextMenuError() {
+  if (browser.runtime.lastError) {
+    kissLog("create contextMenu error:", browser.runtime.lastError);
+  }
+}
+
+/**
  * 添加右键菜单
  */
 async function addContextMenus(contextMenuType = 1) {
@@ -228,14 +237,10 @@ async function addContextMenus(contextMenuType = 1) {
             title: browser.i18n.getMessage("app_name"),
             contexts: ["page", "selection"],
           },
-          () => {
-            if (browser.runtime.lastError) {
-              kissLog("create contextMenu error:", browser.runtime.lastError);
-            }
-          }
+          handleContextMenuError
         );
       } catch (err) {
-        kissLog("create contextMenu error:", err);
+        kissLog("create contextMenu exception:", err);
       }
       break;
     case 2:
@@ -246,11 +251,7 @@ async function addContextMenus(contextMenuType = 1) {
             title: browser.i18n.getMessage("toggle_translate"),
             contexts: ["page", "selection"],
           },
-          () => {
-            if (browser.runtime.lastError) {
-              kissLog("create contextMenu error:", browser.runtime.lastError);
-            }
-          }
+          handleContextMenuError
         );
         browser.contextMenus.create(
           {
@@ -258,11 +259,7 @@ async function addContextMenus(contextMenuType = 1) {
             title: browser.i18n.getMessage("toggle_style"),
             contexts: ["page", "selection"],
           },
-          () => {
-            if (browser.runtime.lastError) {
-              kissLog("create contextMenu error:", browser.runtime.lastError);
-            }
-          }
+          handleContextMenuError
         );
         browser.contextMenus.create(
           {
@@ -270,11 +267,7 @@ async function addContextMenus(contextMenuType = 1) {
             title: browser.i18n.getMessage("open_tranbox"),
             contexts: ["page", "selection"],
           },
-          () => {
-            if (browser.runtime.lastError) {
-              kissLog("create contextMenu error:", browser.runtime.lastError);
-            }
-          }
+          handleContextMenuError
         );
         browser.contextMenus.create(
           {
@@ -282,11 +275,7 @@ async function addContextMenus(contextMenuType = 1) {
             type: "separator",
             contexts: ["page", "selection"],
           },
-          () => {
-            if (browser.runtime.lastError) {
-              kissLog("create contextMenu error:", browser.runtime.lastError);
-            }
-          }
+          handleContextMenuError
         );
         browser.contextMenus.create(
           {
@@ -294,14 +283,10 @@ async function addContextMenus(contextMenuType = 1) {
             title: browser.i18n.getMessage("open_options"),
             contexts: ["page", "selection"],
           },
-          () => {
-            if (browser.runtime.lastError) {
-              kissLog("create contextMenu error:", browser.runtime.lastError);
-            }
-          }
+          handleContextMenuError
         );
       } catch (err) {
-        kissLog("create contextMenu error:", err);
+        kissLog("create contextMenu exception:", err);
       }
       break;
     default:
