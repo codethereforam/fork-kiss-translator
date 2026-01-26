@@ -210,6 +210,10 @@ browser.windows?.onRemoved?.addListener?.(async (windowId) => {
 
 /**
  * 添加右键菜单项的错误处理回调
+ * 
+ * This callback is used by browser.contextMenus.create() to check for
+ * runtime errors after attempting to create a context menu item.
+ * It logs any errors found in browser.runtime.lastError.
  */
 function handleContextMenuError() {
   if (browser.runtime.lastError) {
@@ -253,6 +257,10 @@ async function addContextMenus(contextMenuType = 1) {
           },
           handleContextMenuError
         );
+      } catch (err) {
+        kissLog("create contextMenu exception:", err);
+      }
+      try {
         browser.contextMenus.create(
           {
             id: CMD_TOGGLE_STYLE,
@@ -261,6 +269,10 @@ async function addContextMenus(contextMenuType = 1) {
           },
           handleContextMenuError
         );
+      } catch (err) {
+        kissLog("create contextMenu exception:", err);
+      }
+      try {
         browser.contextMenus.create(
           {
             id: CMD_OPEN_TRANBOX,
@@ -269,6 +281,10 @@ async function addContextMenus(contextMenuType = 1) {
           },
           handleContextMenuError
         );
+      } catch (err) {
+        kissLog("create contextMenu exception:", err);
+      }
+      try {
         browser.contextMenus.create(
           {
             id: "options_separator",
@@ -277,6 +293,10 @@ async function addContextMenus(contextMenuType = 1) {
           },
           handleContextMenuError
         );
+      } catch (err) {
+        kissLog("create contextMenu exception:", err);
+      }
+      try {
         browser.contextMenus.create(
           {
             id: CMD_OPEN_OPTIONS,
