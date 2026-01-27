@@ -28,10 +28,17 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 
-function HistoryAccordion({ item, index, onSelect, isSelected, i18n }) {
+function HistoryAccordion({ item, index, enDict, onSelect, isSelected, i18n }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const handleChange = (e) => {
+    e.stopPropagation();
+    setExpanded((pre) => !pre);
+  };
+
   return (
     <Box>
-      <Accordion>
+      <Accordion expanded={expanded} onChange={handleChange}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           sx={{ position: "relative" }}
@@ -45,7 +52,12 @@ function HistoryAccordion({ item, index, onSelect, isSelected, i18n }) {
             }}
             sx={{ position: "absolute", left: 0, zIndex: 1 }}
           />
-          <Stack direction="row" alignItems="center" spacing={2} sx={{ ml: 4, width: "calc(100% - 48px)" }}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={2}
+            sx={{ ml: 4, width: "calc(100% - 48px)" }}
+          >
             <Typography variant="body2" sx={{ minWidth: 40 }}>
               {index + 1}.
             </Typography>
@@ -58,24 +70,39 @@ function HistoryAccordion({ item, index, onSelect, isSelected, i18n }) {
           </Stack>
         </AccordionSummary>
         <AccordionDetails>
-          <Stack spacing={1}>
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              {i18n("translated_text")}:
-            </Typography>
-            <Typography sx={{ whiteSpace: "pre-line" }}>
-              {item.translation || "-"}
-            </Typography>
-            <Typography variant="caption" sx={{ color: "text.secondary", mt: 1 }}>
-              {new Date(item.timestamp).toLocaleString("zh-CN")}
-            </Typography>
-          </Stack>
+          {expanded && (
+            <Stack spacing={2}>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                {i18n("translated_text")}:
+              </Typography>
+              <Typography sx={{ whiteSpace: "pre-line" }}>
+                {item.translation || "-"}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{ color: "text.secondary", mt: 1 }}
+              >
+                {new Date(item.timestamp).toLocaleString("zh-CN")}
+              </Typography>
+              {enDict && <DictCont text={item.text} enDict={enDict} />}
+            </Stack>
+          )}
         </AccordionDetails>
       </Accordion>
     </Box>
   );
 }
 
-function FavAccordion({ word, index, createdAt, timestamp, enDict, enSug, onSelect, isSelected }) {
+function FavAccordion({
+  word,
+  index,
+  createdAt,
+  timestamp,
+  enDict,
+  enSug,
+  onSelect,
+  isSelected,
+}) {
   const [expanded, setExpanded] = useState(false);
 
   const handleChange = (e) => {
@@ -110,7 +137,10 @@ function FavAccordion({ word, index, createdAt, timestamp, enDict, enSug, onSele
   return (
     <Box>
       <Accordion expanded={expanded} onChange={handleChange}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ position: "relative" }}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          sx={{ position: "relative" }}
+        >
           <Checkbox
             checked={isSelected}
             size="small"
@@ -120,7 +150,12 @@ function FavAccordion({ word, index, createdAt, timestamp, enDict, enSug, onSele
             }}
             sx={{ position: "absolute", left: 0, zIndex: 1 }}
           />
-          <Stack direction="row" alignItems="center" spacing={2} sx={{ ml: 4, width: "calc(100% - 48px)" }}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={2}
+            sx={{ ml: 4, width: "calc(100% - 48px)" }}
+          >
             <Typography variant="body2" sx={{ minWidth: 40 }}>
               {index + 1}.
             </Typography>
@@ -160,7 +195,8 @@ function FavAccordion({ word, index, createdAt, timestamp, enDict, enSug, onSele
 
 export default function FavWords() {
   const i18n = useI18n();
-  const { favList, wordList, mergeWords, clearWords, toggleFav } = useFavWords();
+  const { favList, wordList, mergeWords, clearWords, toggleFav } =
+    useFavWords();
   const { history, clearHistory, deleteHistoryItems } = useLookupHistory();
   const { setting } = useSetting();
   const confirm = useConfirm();
@@ -179,7 +215,9 @@ export default function FavWords() {
     : history;
 
   const filteredFavList = searchQuery
-    ? favList.filter(([word]) => word.toLowerCase().includes(searchQuery.toLowerCase()))
+    ? favList.filter(([word]) =>
+        word.toLowerCase().includes(searchQuery.toLowerCase())
+      )
     : favList;
 
   const handleImport = (data) => {
@@ -442,8 +480,132 @@ export default function FavWords() {
       const date = new Date(item.timestamp).toLocaleString("zh-CN");
       const escapedText = item.text.replace(/"/g, '""');
       const escapedTranslation = item.translation.replace(/"/g, '""');
-      lines.push(`"${escapedText}","${escapedTranslation}","${item.service}","${date}"`);
+      lines.push(
+        `"${escapedText}","${escapedTranslation}","${item.service}","${date}"`
+      );
     });
+
+    return lines.join("\n");
+  };
+
+  // 导出查词历史为 TXT 格式（包含词典释义）
+  const handleExportHistoryTxt = async () => {
+    const { enDict } = setting?.tranboxSetting;
+    const dict = dictHandlers[enDict];
+    const lines = [];
+    lines.push("查词历史导出文件");
+    lines.push(`导出时间: ${new Date().toLocaleString("zh-CN")}`);
+    lines.push("");
+
+    for (const [index, item] of history.entries()) {
+      lines.push(`${index + 1}. ${item.text}`);
+      lines.push(`   译文: ${item.translation || "-"}`);
+      lines.push(`   翻译服务: ${item.service || "-"}`);
+      lines.push(
+        `   时间: ${new Date(item.timestamp).toLocaleString("zh-CN")}`
+      );
+
+      // 如果有词典配置，获取并添加词典释义
+      if (dict) {
+        try {
+          const dictData = await dict.apiFn(item.text);
+          const dictLines = dict.toText(dictData);
+          if (dictLines && dictLines.length > 0) {
+            lines.push("   词典释义:");
+            dictLines.forEach((line) => {
+              lines.push(`   ${line}`);
+            });
+          }
+        } catch (err) {
+          kissLog("export history dict", err);
+        }
+      }
+
+      lines.push(""); // 空行分隔
+    }
+
+    return lines.join("\n");
+  };
+
+  // 导出查词历史为 CSV 格式（包含词典释义）
+  const handleExportHistoryCsv = async () => {
+    const { enDict } = setting?.tranboxSetting;
+    const dict = dictHandlers[enDict];
+    const header = "Word,Translation,Service,Time,Dictionary Definition";
+    const rows = [];
+
+    for (const item of history) {
+      const escapeCSVField = (field) => {
+        if (!field) return '""';
+        return `"${field.toString().replace(/"/g, '""')}"`;
+      };
+
+      const date = new Date(item.timestamp).toLocaleString("zh-CN");
+      let dictDefinition = "";
+
+      // 如果有词典配置，获取并添加词典释义
+      if (dict) {
+        try {
+          const dictData = await dict.apiFn(item.text);
+          const dictLines = dict.toText(dictData);
+          if (dictLines && dictLines.length > 0) {
+            dictDefinition = dictLines.join("; ");
+          }
+        } catch (err) {
+          kissLog("export history dict", err);
+        }
+      }
+
+      rows.push(
+        `${escapeCSVField(item.text)},${escapeCSVField(item.translation)},${escapeCSVField(item.service)},${escapeCSVField(date)},${escapeCSVField(dictDefinition)}`
+      );
+    }
+
+    const csvContent = [
+      `"查词历史导出文件",,,,`,
+      `,,,,,,,,`,
+      header,
+      ...rows,
+    ].join("\n");
+
+    return "\uFEFF" + csvContent;
+  };
+
+  // 导出查词历史为 Markdown 格式（包含词典释义）
+  const handleExportHistoryMd = async () => {
+    const { enDict } = setting?.tranboxSetting;
+    const dict = dictHandlers[enDict];
+    const lines = [];
+    lines.push("# 查词历史导出文件");
+    lines.push(`_导出时间: ${new Date().toLocaleString("zh-CN")}_`);
+    lines.push("");
+
+    for (const [index, item] of history.entries()) {
+      lines.push(`${index + 1}. **${item.text}**`);
+      lines.push(`   *译文 Translation:* ${item.translation || "-"}`);
+      lines.push(`   *翻译服务 Service:* ${item.service || "-"}`);
+      lines.push(
+        `   *时间 Time:* ${new Date(item.timestamp).toLocaleString("zh-CN")}`
+      );
+
+      // 如果有词典配置，获取并添加词典释义
+      if (dict) {
+        try {
+          const dictData = await dict.apiFn(item.text);
+          const dictLines = dict.toText(dictData);
+          if (dictLines && dictLines.length > 0) {
+            lines.push("   *词典释义 Dictionary Definition:*");
+            dictLines.forEach((line) => {
+              lines.push(`   - ${line}`);
+            });
+          }
+        } catch (err) {
+          kissLog("export history dict", err);
+        }
+      }
+
+      lines.push(""); // 空行分隔
+    }
 
     return lines.join("\n");
   };
@@ -471,9 +633,10 @@ export default function FavWords() {
 
   const handleSelectAll = () => {
     const currentList = tabValue === 0 ? filteredFavList : filteredHistory;
-    const allIds = tabValue === 0
-      ? currentList.map(([word]) => word)
-      : currentList.map((item) => item);
+    const allIds =
+      tabValue === 0
+        ? currentList.map(([word]) => word)
+        : currentList.map((item) => item);
     const allSelected = currentList.every(
       tabValue === 0
         ? ([word]) => selectedItems.has(word)
@@ -501,10 +664,15 @@ export default function FavWords() {
     <Box>
       <Stack spacing={3}>
         <Alert severity="info">
-          {tabValue === 0 ? i18n("favorite_words_helper") : i18n("lookup_history_helper")}
+          {tabValue === 0
+            ? i18n("favorite_words_helper")
+            : i18n("lookup_history_helper")}
         </Alert>
 
-        <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)}>
+        <Tabs
+          value={tabValue}
+          onChange={(e, newValue) => setTabValue(newValue)}
+        >
           <Tab label={i18n("favorite_words")} />
           <Tab label={i18n("lookup_history")} />
         </Tabs>
@@ -563,11 +731,28 @@ export default function FavWords() {
           )}
 
           {tabValue === 1 && (
-            <DownloadButton
-              handleData={handleExportHistory}
-              text={i18n("export")}
-              fileName={`kiss-lookup-history_${Date.now()}.csv`}
-            />
+            <>
+              <DownloadButton
+                handleData={handleExportHistory}
+                text={i18n("export")}
+                fileName={`kiss-lookup-history_${Date.now()}.csv`}
+              />
+              <DownloadButton
+                handleData={handleExportHistoryTxt}
+                text={i18n("export") + " (TXT)"}
+                fileName={`kiss-lookup-history_${Date.now()}.txt`}
+              />
+              <DownloadButton
+                handleData={handleExportHistoryCsv}
+                text={i18n("export") + " (CSV)"}
+                fileName={`kiss-lookup-history_${Date.now()}.csv`}
+              />
+              <DownloadButton
+                handleData={handleExportHistoryMd}
+                text={i18n("export") + " (MD)"}
+                fileName={`kiss-lookup-history_${Date.now()}.md`}
+              />
+            </>
           )}
 
           <Button
@@ -616,18 +801,22 @@ export default function FavWords() {
         />
 
         <Box>
-          {tabValue === 0 &&
-            filteredFavList.length === 0 && (
-              <Typography sx={{ color: "text.secondary", py: 4, textAlign: "center" }}>
-                {i18n("no_favorite_words")}
-              </Typography>
-            )}
-          {tabValue === 1 &&
-            filteredHistory.length === 0 && (
-              <Typography sx={{ color: "text.secondary", py: 4, textAlign: "center" }}>
-                {searchQuery ? i18n("no_search_results") : i18n("no_lookup_history")}
-              </Typography>
-            )}
+          {tabValue === 0 && filteredFavList.length === 0 && (
+            <Typography
+              sx={{ color: "text.secondary", py: 4, textAlign: "center" }}
+            >
+              {i18n("no_favorite_words")}
+            </Typography>
+          )}
+          {tabValue === 1 && filteredHistory.length === 0 && (
+            <Typography
+              sx={{ color: "text.secondary", py: 4, textAlign: "center" }}
+            >
+              {searchQuery
+                ? i18n("no_search_results")
+                : i18n("no_lookup_history")}
+            </Typography>
+          )}
 
           {tabValue === 0 &&
             filteredFavList.map(([word, { createdAt, timestamp }], index) => (
@@ -650,6 +839,7 @@ export default function FavWords() {
                 key={`${item.text}-${index}`}
                 item={item}
                 index={index}
+                enDict={enDict}
                 onSelect={handleItemSelect}
                 isSelected={selectedItems.has(item)}
                 i18n={i18n}
