@@ -2010,6 +2010,20 @@ export const I18N = {
     ja: `API名`,
     ko: `API 이름`,
   },
+  sort_order: {
+    zh: `排序权重`,
+    en: `Sort Order`,
+    zh_TW: `排序權重`,
+    ja: `ソート順序`,
+    ko: `정렬 순서`,
+  },
+  sort_order_help: {
+    zh: `数值越小越靠前`,
+    en: `Smaller values appear first`,
+    zh_TW: `數值越小越靠前`,
+    ja: `小さい値が先に表示されます`,
+    ko: `작은 값이 먼저 표시됩니다`,
+  },
   is_disabled: {
     zh: `是否禁用`,
     en: `Is Disabled`,
@@ -2303,6 +2317,27 @@ export const I18N = {
     zh_TW: `佔位標`,
     ja: `プレースホルダタグ`,
     ko: `플레이스홀더 태그`,
+  },
+  placetag_format: {
+    zh: `占位符格式`,
+    en: `Placeholder Format`,
+    zh_TW: `佔位符格式`,
+    ja: `プレースホルダー形式`,
+    ko: `자리 표시자 형식`,
+  },
+  format_compact: {
+    zh: `简洁格式 <a1>`,
+    en: `Compact Format <a1>`,
+    zh_TW: `簡潔格式 <a1>`,
+    ja: `簡潔形式 <a1>`,
+    ko: `간결 형식 <a1>`,
+  },
+  format_attribute: {
+    zh: `属性格式 <a i=1>`,
+    en: `Attribute Format <a i=1>`,
+    zh_TW: `屬性格式 <a i=1>`,
+    ja: `属性形式 <a i=1>`,
+    ko: `속성 형식 <a i=1>`,
   },
   detected_lang: {
     zh: `语言检测`,
@@ -2702,6 +2737,34 @@ export const I18N = {
     zh_TW: `收藏`,
     ja: `保存`,
     ko: `저장`,
+  },
+  show_translation_dot: {
+    zh: `显示翻译圆点`,
+    en: `Show Translation Dot`,
+    zh_TW: `顯示翻譯圓點`,
+    ja: `翻訳ドットを表示`,
+    ko: `번역 점 표시`,
+  },
+  show_dot_mobile: {
+    zh: `仅移动端`,
+    en: `Mobile Only`,
+    zh_TW: `僅移動端`,
+    ja: `モバイルのみ`,
+    ko: `모바일 전용`,
+  },
+  show_dot_always: {
+    zh: `总是显示`,
+    en: `Always`,
+    zh_TW: `總是顯示`,
+    ja: `常に表示`,
+    ko: `항상 표시`,
+  },
+  show_dot_disable: {
+    zh: `禁用`,
+    en: `Disable`,
+    zh_TW: `禁用`,
+    ja: `無効`,
+    ko: `사용 안 함`,
   },
 };
 
