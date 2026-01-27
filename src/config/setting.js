@@ -196,4 +196,6 @@ export const DEFAULT_SETTING = {
   logLevel: LogLevel.INFO.value, // 日志级别
   rootMargin: 500, // 提前触发翻译
   customStyles: DEFAULT_CUSTOM_STYLES, // 自定义样式列表
+  wordHistoryEnabled: true, // 是否启用查词历史
+  wordHistoryMaxCount: 1000, // 查词历史最大数量
 };

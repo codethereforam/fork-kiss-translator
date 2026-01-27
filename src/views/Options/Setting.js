@@ -106,6 +106,8 @@ export default function Settings() {
     // detectRemote = true,
     transAllnow = false,
     rootMargin = 500,
+    wordHistoryEnabled = true,
+    wordHistoryMaxCount = 1000,
   } = setting;
   const { isHide = false, fabClickAction = 0 } = fab || {};
 
@@ -374,6 +376,33 @@ export default function Settings() {
                   </MenuItem>
                 ))}
               </TextField>
+            </Grid>
+            <Grid item xs={12} sm={12} md={6} lg={3}>
+              <TextField
+                select
+                fullWidth
+                size="small"
+                name="wordHistoryEnabled"
+                value={wordHistoryEnabled}
+                label={i18n("word_history_enabled")}
+                onChange={handleChange}
+              >
+                <MenuItem value={true}>{i18n("enable")}</MenuItem>
+                <MenuItem value={false}>{i18n("disable")}</MenuItem>
+              </TextField>
+            </Grid>
+            <Grid item xs={12} sm={12} md={6} lg={3}>
+              <ValidationInput
+                fullWidth
+                size="small"
+                label={i18n("word_history_max_count")}
+                type="number"
+                name="wordHistoryMaxCount"
+                value={wordHistoryMaxCount}
+                onChange={handleChange}
+                min={100}
+                max={10000}
+              />
             </Grid>
           </Grid>
         </Box>

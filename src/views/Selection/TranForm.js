@@ -26,6 +26,7 @@ import CopyBtn from "./CopyBtn";
 import { isValidWord } from "../../libs/utils";
 import { kissLog } from "../../libs/log";
 import { tryDetectLang } from "../../libs/detect";
+import { useWordHistory } from "../../hooks/WordHistory";
 
 export default function TranForm({
   text,
@@ -42,6 +43,7 @@ export default function TranForm({
   isPlaygound = false,
 }) {
   const i18n = useI18n();
+  const { addToHistory } = useWordHistory();
 
   const [editMode, setEditMode] = useState(false);
   const [editText, setEditText] = useState(text);
@@ -65,6 +67,13 @@ export default function TranForm({
     const len = input.value.length;
     input.setSelectionRange(len, len);
   }, []);
+
+  // Record word to history when text changes
+  useEffect(() => {
+    if (text && text.trim()) {
+      addToHistory(text.trim());
+    }
+  }, [text, addToHistory]);
 
   useEffect(() => {
     if (isValidWord(text)) {
