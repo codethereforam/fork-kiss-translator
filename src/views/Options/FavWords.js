@@ -118,7 +118,7 @@ function HistoryAccordion({
     onSelectChange(word, e.target.checked);
   };
 
-  // 格式化时间为日期格式
+  // Format timestamp to date string
   const formatDate = (timestamp) => {
     if (!timestamp) return "";
     return new Date(timestamp).toLocaleString();
@@ -427,21 +427,21 @@ function FavoritesTab() {
           fileName={`kiss-words_${Date.now()}.txt`}
         />
 
-        {/* 导出为 TXT 格式 */}
+        {/* Export as TXT format */}
         <DownloadButton
           handleData={handleExportTxt}
           text={i18n("export") + " (TXT)"}
           fileName={`kiss-words_${Date.now()}.txt`}
         />
 
-        {/* 导出为 CSV 格式 */}
+        {/* Export as CSV format */}
         <DownloadButton
           handleData={handleExportCsv}
           text={i18n("export") + " (CSV)"}
           fileName={`kiss-words_${Date.now()}.csv`}
         />
 
-        {/* 导出为 Markdown 格式 */}
+        {/* Export as Markdown format */}
         <DownloadButton
           handleData={handleExportMd}
           text={i18n("export") + " (MD)"}

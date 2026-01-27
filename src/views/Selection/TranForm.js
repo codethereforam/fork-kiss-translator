@@ -68,9 +68,9 @@ export default function TranForm({
     input.setSelectionRange(len, len);
   }, []);
 
-  // Record word to history when text changes
+  // Record word to history when text changes (only valid words)
   useEffect(() => {
-    if (text && text.trim()) {
+    if (text && text.trim() && isValidWord(text)) {
       addToHistory(text.trim());
     }
   }, [text, addToHistory]);
