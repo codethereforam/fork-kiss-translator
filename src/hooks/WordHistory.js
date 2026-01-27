@@ -1,13 +1,42 @@
 import { STOKEY_WORD_HISTORY, KV_WORD_HISTORY_KEY } from "../config";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef, useEffect } from "react";
 import { useStorage } from "./Storage";
 import { debounceSyncMeta } from "../libs/storage";
 import { useSetting } from "./Setting";
 
 const DEFAULT_WORD_HISTORY = [];
 
+// Helper function to add words to history array
+function addWordsToHistory(history, wordsToAdd, maxCount) {
+  let result = Array.isArray(history) ? [...history] : [];
+
+  for (const normalizedWord of wordsToAdd) {
+    // Remove existing entry (case-insensitive deduplication)
+    const existingIndex = result.findIndex(
+      (item) => item.word.toLowerCase() === normalizedWord.toLowerCase()
+    );
+
+    if (existingIndex !== -1) {
+      result.splice(existingIndex, 1);
+    }
+
+    // Add new entry at the beginning
+    result.unshift({
+      word: normalizedWord,
+      createdAt: Date.now(),
+    });
+  }
+
+  // Limit history count
+  if (result.length > maxCount) {
+    result.splice(maxCount);
+  }
+
+  return result;
+}
+
 export function useWordHistory() {
-  const { data: wordHistory, save: saveHistory } = useStorage(
+  const { data: wordHistory, save: saveHistory, isLoading } = useStorage(
     STOKEY_WORD_HISTORY,
     DEFAULT_WORD_HISTORY,
     KV_WORD_HISTORY_KEY
@@ -17,6 +46,9 @@ export function useWordHistory() {
   const { wordHistoryEnabled = true, wordHistoryMaxCount = 1000 } =
     setting || {};
 
+  // Queue words to add while storage is loading
+  const pendingWordsRef = useRef([]);
+
   const save = useCallback(
     (objOrFn) => {
       saveHistory(objOrFn);
@@ -24,6 +56,16 @@ export function useWordHistory() {
     },
     [saveHistory]
   );
+
+  // Process pending words once storage is loaded
+  useEffect(() => {
+    if (!isLoading && pendingWordsRef.current.length > 0) {
+      const wordsToAdd = [...pendingWordsRef.current];
+      pendingWordsRef.current = [];
+
+      save((prev) => addWordsToHistory(prev, wordsToAdd, wordHistoryMaxCount));
+    }
+  }, [isLoading, save, wordHistoryMaxCount]);
 
   const addToHistory = useCallback(
     (word) => {
@@ -33,33 +75,19 @@ export function useWordHistory() {
       const normalizedWord = word.trim();
       if (!normalizedWord) return;
 
-      save((prev) => {
-        const history = Array.isArray(prev) ? [...prev] : [];
-
-        // Remove existing entry (case-insensitive deduplication)
-        const existingIndex = history.findIndex(
-          (item) => item.word.toLowerCase() === normalizedWord.toLowerCase()
-        );
-
-        if (existingIndex !== -1) {
-          history.splice(existingIndex, 1);
+      // If still loading, queue the word to be added later
+      if (isLoading) {
+        if (!pendingWordsRef.current.includes(normalizedWord)) {
+          pendingWordsRef.current.push(normalizedWord);
         }
+        return;
+      }
 
-        // Add new entry at the beginning
-        history.unshift({
-          word: normalizedWord,
-          createdAt: Date.now(),
-        });
-
-        // Limit history count
-        if (history.length > wordHistoryMaxCount) {
-          history.splice(wordHistoryMaxCount);
-        }
-
-        return history;
-      });
+      save((prev) =>
+        addWordsToHistory(prev, [normalizedWord], wordHistoryMaxCount)
+      );
     },
-    [save, wordHistoryEnabled, wordHistoryMaxCount]
+    [save, wordHistoryEnabled, wordHistoryMaxCount, isLoading]
   );
 
   const removeFromHistory = useCallback(
