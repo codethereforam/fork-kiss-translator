@@ -1,5 +1,5 @@
 import Stack from "@mui/material/Stack";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Typography from "@mui/material/Typography";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -8,18 +8,27 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useI18n } from "../../hooks/I18n";
 import Box from "@mui/material/Box";
 import { useFavWords } from "../../hooks/FavWords";
+import { useWordHistory } from "../../hooks/WordHistory";
 import DictCont from "../Selection/DictCont";
 import SugCont from "../Selection/SugCont";
 import DownloadButton from "./DownloadButton";
 import UploadButton from "./UploadButton";
 import Button from "@mui/material/Button";
 import ClearAllIcon from "@mui/icons-material/ClearAll";
+import DeleteIcon from "@mui/icons-material/Delete";
 import Alert from "@mui/material/Alert";
 import { isValidWord } from "../../libs/utils";
 import { kissLog } from "../../libs/log";
 import { useConfirm } from "../../hooks/Confirm";
 import { useSetting } from "../../hooks/Setting";
 import { dictHandlers } from "../Selection/DictHandler";
+import Tab from "@mui/material/Tab";
+import TabContext from "@mui/lab/TabContext";
+import TabList from "@mui/lab/TabList";
+import TabPanel from "@mui/lab/TabPanel";
+import TextField from "@mui/material/TextField";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 
 function FavAccordion({ word, index, createdAt, timestamp }) {
   const [expanded, setExpanded] = useState(false);
@@ -89,7 +98,67 @@ function FavAccordion({ word, index, createdAt, timestamp }) {
   );
 }
 
-export default function FavWords() {
+function HistoryAccordion({
+  word,
+  index,
+  createdAt,
+  selected,
+  onSelectChange,
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const { setting } = useSetting();
+  const { enDict, enSug } = setting?.tranboxSetting || {};
+
+  const handleChange = (e) => {
+    setExpanded((pre) => !pre);
+  };
+
+  const handleCheckboxChange = (e) => {
+    e.stopPropagation();
+    onSelectChange(word, e.target.checked);
+  };
+
+  // Format timestamp to date string
+  const formatDate = (timestamp) => {
+    if (!timestamp) return "";
+    return new Date(timestamp).toLocaleString();
+  };
+
+  return (
+    <Accordion expanded={expanded} onChange={handleChange}>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <Checkbox
+            checked={selected}
+            onChange={handleCheckboxChange}
+            onClick={(e) => e.stopPropagation()}
+            size="small"
+          />
+          <Typography>
+            {`${index + 1}. ${word}`}
+            <Typography
+              component="span"
+              variant="caption"
+              sx={{ ml: 2, color: "text.secondary" }}
+            >
+              {formatDate(createdAt)}
+            </Typography>
+          </Typography>
+        </Stack>
+      </AccordionSummary>
+      <AccordionDetails>
+        {expanded && (
+          <Stack spacing={2}>
+            <DictCont text={word} enDict={enDict} />
+            <SugCont text={word} enSug={enSug} />
+          </Stack>
+        )}
+      </AccordionDetails>
+    </Accordion>
+  );
+}
+
+function FavoritesTab() {
   const i18n = useI18n();
   const { favList, wordList, mergeWords, clearWords } = useFavWords();
   const { setting } = useSetting();
@@ -335,78 +404,274 @@ export default function FavWords() {
   };
 
   return (
-    <Box>
-      <Stack spacing={3}>
-        <Alert severity="info">{i18n("favorite_words_helper")}</Alert>
+    <Stack spacing={3}>
+      <Alert severity="info">{i18n("favorite_words_helper")}</Alert>
 
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={2}
-          useFlexGap
-          flexWrap="wrap"
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={2}
+        useFlexGap
+        flexWrap="wrap"
+      >
+        <UploadButton
+          text={i18n("import")}
+          handleImport={handleImport}
+          fileType="text"
+          fileExts={[".txt", ".csv"]}
+        />
+
+        <DownloadButton
+          handleData={() => wordList.join("\n")}
+          text={i18n("export")}
+          fileName={`kiss-words_${Date.now()}.txt`}
+        />
+
+        {/* Export as TXT format */}
+        <DownloadButton
+          handleData={handleExportTxt}
+          text={i18n("export") + " (TXT)"}
+          fileName={`kiss-words_${Date.now()}.txt`}
+        />
+
+        {/* Export as CSV format */}
+        <DownloadButton
+          handleData={handleExportCsv}
+          text={i18n("export") + " (CSV)"}
+          fileName={`kiss-words_${Date.now()}.csv`}
+        />
+
+        {/* Export as Markdown format */}
+        <DownloadButton
+          handleData={handleExportMd}
+          text={i18n("export") + " (MD)"}
+          fileName={`kiss-words_${Date.now()}.md`}
+        />
+
+        <DownloadButton
+          handleData={handleTranslation}
+          text={i18n("export_translation")}
+          fileName={`kiss-words_${Date.now()}.md`}
+        />
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={handleClearWords}
+          startIcon={<ClearAllIcon />}
         >
-          <UploadButton
-            text={i18n("import")}
-            handleImport={handleImport}
-            fileType="text"
-            fileExts={[".txt", ".csv"]}
-          />
-
-          <DownloadButton
-            handleData={() => wordList.join("\n")}
-            text={i18n("export")}
-            fileName={`kiss-words_${Date.now()}.txt`}
-          />
-
-          {/* 导出为 TXT 格式 */}
-          <DownloadButton
-            handleData={handleExportTxt}
-            text={i18n("export") + " (TXT)"}
-            fileName={`kiss-words_${Date.now()}.txt`}
-          />
-
-          {/* 导出为 CSV 格式 */}
-          <DownloadButton
-            handleData={handleExportCsv}
-            text={i18n("export") + " (CSV)"}
-            fileName={`kiss-words_${Date.now()}.csv`}
-          />
-
-          {/* 导出为 Markdown 格式 */}
-          <DownloadButton
-            handleData={handleExportMd}
-            text={i18n("export") + " (MD)"}
-            fileName={`kiss-words_${Date.now()}.md`}
-          />
-
-          <DownloadButton
-            handleData={handleTranslation}
-            text={i18n("export_translation")}
-            fileName={`kiss-words_${Date.now()}.md`}
-          />
-          <Button
-            size="small"
-            variant="outlined"
-            onClick={handleClearWords}
-            startIcon={<ClearAllIcon />}
-          >
-            {i18n("clear_all")}
-          </Button>
-        </Stack>
-
-        <Box>
-          {favList.map(([word, { createdAt, timestamp }], index) => (
-            <FavAccordion
-              key={word}
-              index={index}
-              word={word}
-              createdAt={createdAt}
-              timestamp={timestamp}
-            />
-          ))}
-        </Box>
+          {i18n("clear_all")}
+        </Button>
       </Stack>
+
+      <Box>
+        {favList.map(([word, { createdAt, timestamp }], index) => (
+          <FavAccordion
+            key={word}
+            index={index}
+            word={word}
+            createdAt={createdAt}
+            timestamp={timestamp}
+          />
+        ))}
+      </Box>
+    </Stack>
+  );
+}
+
+function HistoryTab() {
+  const i18n = useI18n();
+  const { wordHistory, wordList, removeFromHistory, clearHistory } =
+    useWordHistory();
+  const confirm = useConfirm();
+  const [searchText, setSearchText] = useState("");
+  const [selectedWords, setSelectedWords] = useState(new Set());
+
+  // Filter history based on search
+  const filteredHistory = useMemo(() => {
+    if (!searchText.trim()) return wordHistory;
+    const searchLower = searchText.toLowerCase();
+    return wordHistory.filter((item) =>
+      item.word.toLowerCase().includes(searchLower)
+    );
+  }, [wordHistory, searchText]);
+
+  const handleSelectChange = (word, checked) => {
+    setSelectedWords((prev) => {
+      const newSet = new Set(prev);
+      if (checked) {
+        newSet.add(word);
+      } else {
+        newSet.delete(word);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedWords.size === filteredHistory.length) {
+      setSelectedWords(new Set());
+    } else {
+      setSelectedWords(new Set(filteredHistory.map((item) => item.word)));
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedWords.size === 0) return;
+
+    const isConfirmed = await confirm({
+      confirmText: i18n("confirm_delete_history") || i18n("confirm_title"),
+      cancelText: i18n("cancel"),
+    });
+
+    if (isConfirmed) {
+      removeFromHistory(Array.from(selectedWords));
+      setSelectedWords(new Set());
+    }
+  };
+
+  const handleClearHistory = async () => {
+    const isConfirmed = await confirm({
+      confirmText: i18n("confirm_clear_history") || i18n("confirm_title"),
+      cancelText: i18n("cancel"),
+    });
+
+    if (isConfirmed) {
+      clearHistory();
+      setSelectedWords(new Set());
+    }
+  };
+
+  const handleExportHistory = () => {
+    return wordList.join("\n");
+  };
+
+  const isAllSelected =
+    filteredHistory.length > 0 &&
+    selectedWords.size === filteredHistory.length;
+
+  return (
+    <Stack spacing={3}>
+      <Alert severity="info">{i18n("word_history_helper")}</Alert>
+
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={2}
+        useFlexGap
+        flexWrap="wrap"
+      >
+        <TextField
+          size="small"
+          label={i18n("search_history")}
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          sx={{ minWidth: 200 }}
+        />
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={isAllSelected}
+              indeterminate={
+                selectedWords.size > 0 &&
+                selectedWords.size < filteredHistory.length
+              }
+              onChange={handleSelectAll}
+            />
+          }
+          label={isAllSelected ? i18n("deselect_all") : i18n("select_all")}
+        />
+
+        {selectedWords.size > 0 && (
+          <Typography variant="body2" color="text.secondary">
+            {(i18n("selected_count") || "{{count}} items selected").replace(
+              "{{count}}",
+              selectedWords.size
+            )}
+          </Typography>
+        )}
+      </Stack>
+
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={2}
+        useFlexGap
+        flexWrap="wrap"
+      >
+        <Button
+          size="small"
+          variant="outlined"
+          color="error"
+          onClick={handleDeleteSelected}
+          disabled={selectedWords.size === 0}
+          startIcon={<DeleteIcon />}
+        >
+          {i18n("delete_selected")}
+        </Button>
+
+        <DownloadButton
+          handleData={handleExportHistory}
+          text={i18n("export")}
+          fileName={`kiss-word-history_${Date.now()}.txt`}
+        />
+
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={handleClearHistory}
+          startIcon={<ClearAllIcon />}
+        >
+          {i18n("clear_history")}
+        </Button>
+      </Stack>
+
+      <Box>
+        {filteredHistory.length === 0 ? (
+          <Typography color="text.secondary" sx={{ textAlign: "center", py: 4 }}>
+            {i18n("no_history")}
+          </Typography>
+        ) : (
+          filteredHistory.map((item, index) => (
+            <HistoryAccordion
+              key={`${item.word}-${item.createdAt}`}
+              index={index}
+              word={item.word}
+              createdAt={item.createdAt}
+              selected={selectedWords.has(item.word)}
+              onSelectChange={handleSelectChange}
+            />
+          ))
+        )}
+      </Box>
+    </Stack>
+  );
+}
+
+export default function FavWords() {
+  const i18n = useI18n();
+  const [tabValue, setTabValue] = useState("favorites");
+
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
+  return (
+    <Box>
+      <TabContext value={tabValue}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <TabList onChange={handleTabChange}>
+            <Tab label={i18n("favorite_words")} value="favorites" />
+            <Tab label={i18n("word_history")} value="history" />
+          </TabList>
+        </Box>
+        <TabPanel value="favorites" sx={{ px: 0 }}>
+          <FavoritesTab />
+        </TabPanel>
+        <TabPanel value="history" sx={{ px: 0 }}>
+          <HistoryTab />
+        </TabPanel>
+      </TabContext>
     </Box>
   );
 }

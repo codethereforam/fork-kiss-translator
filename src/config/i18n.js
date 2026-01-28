@@ -2766,6 +2766,58 @@ export const I18N = {
     ja: `無効`,
     ko: `사용 안 함`,
   },
+  word_history: {
+    zh: `查词历史`,
+    en: `Word History`,
+  },
+  word_history_enabled: {
+    zh: `启用查词历史`,
+    en: `Enable Word History`,
+  },
+  word_history_max_count: {
+    zh: `历史记录最大数量`,
+    en: `Maximum History Count`,
+  },
+  word_history_helper: {
+    zh: `查看您的划词翻译历史记录`,
+    en: `View your word lookup history`,
+  },
+  no_history: {
+    zh: `暂无历史记录`,
+    en: `No history records`,
+  },
+  search_history: {
+    zh: `搜索历史`,
+    en: `Search History`,
+  },
+  delete_selected: {
+    zh: `删除选中`,
+    en: `Delete Selected`,
+  },
+  select_all: {
+    zh: `全选`,
+    en: `Select All`,
+  },
+  deselect_all: {
+    zh: `取消全选`,
+    en: `Deselect All`,
+  },
+  selected_count: {
+    zh: `已选择 {{count}} 项`,
+    en: `{{count}} items selected`,
+  },
+  confirm_delete_history: {
+    zh: `确定要删除选中的历史记录吗？`,
+    en: `Are you sure you want to delete the selected history?`,
+  },
+  clear_history: {
+    zh: `清空历史`,
+    en: `Clear History`,
+  },
+  confirm_clear_history: {
+    zh: `确定要清空所有历史记录吗？`,
+    en: `Are you sure you want to clear all history?`,
+  },
 };
 
 export const newI18n = (lang) => (key) => I18N[key]?.[lang] || "";
