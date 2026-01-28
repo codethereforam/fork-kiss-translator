@@ -48,18 +48,6 @@ export function useWordHistory() {
 
   // Queue words to add while storage is loading
   const pendingWordsRef = useRef([]);
-  
-  // Use ref to track loading state so addToHistory doesn't need to change
-  const isLoadingRef = useRef(isLoading);
-  useEffect(() => {
-    isLoadingRef.current = isLoading;
-  }, [isLoading]);
-
-  // Use refs for settings to keep addToHistory stable
-  const settingsRef = useRef({ wordHistoryEnabled, wordHistoryMaxCount });
-  useEffect(() => {
-    settingsRef.current = { wordHistoryEnabled, wordHistoryMaxCount };
-  }, [wordHistoryEnabled, wordHistoryMaxCount]);
 
   const save = useCallback(
     (objOrFn) => {
@@ -75,15 +63,12 @@ export function useWordHistory() {
       const wordsToAdd = [...pendingWordsRef.current];
       pendingWordsRef.current = [];
 
-      save((prev) => addWordsToHistory(prev, wordsToAdd, settingsRef.current.wordHistoryMaxCount));
+      save((prev) => addWordsToHistory(prev, wordsToAdd, wordHistoryMaxCount));
     }
-  }, [isLoading, save]);
+  }, [isLoading, save, wordHistoryMaxCount]);
 
-  // addToHistory is now stable - uses refs to check current state
   const addToHistory = useCallback(
     (word) => {
-      const { wordHistoryEnabled, wordHistoryMaxCount } = settingsRef.current;
-      
       if (!wordHistoryEnabled) return;
       if (!word || typeof word !== "string") return;
 
@@ -91,7 +76,7 @@ export function useWordHistory() {
       if (!normalizedWord) return;
 
       // If still loading, queue the word to be added later
-      if (isLoadingRef.current) {
+      if (isLoading) {
         if (!pendingWordsRef.current.includes(normalizedWord)) {
           pendingWordsRef.current.push(normalizedWord);
         }
@@ -102,7 +87,7 @@ export function useWordHistory() {
         addWordsToHistory(prev, [normalizedWord], wordHistoryMaxCount)
       );
     },
-    [save]
+    [save, wordHistoryEnabled, wordHistoryMaxCount, isLoading]
   );
 
   const removeFromHistory = useCallback(
