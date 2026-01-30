@@ -209,6 +209,19 @@ browser.windows?.onRemoved?.addListener?.(async (windowId) => {
 });
 
 /**
+ * 添加右键菜单项的错误处理回调
+ * 
+ * This callback is used by browser.contextMenus.create() to check for
+ * runtime errors after attempting to create a context menu item.
+ * It logs any errors found in browser.runtime.lastError.
+ */
+function handleContextMenuError() {
+  if (browser.runtime.lastError) {
+    kissLog("create contextMenu error:", browser.runtime.lastError);
+  }
+}
+
+/**
  * 添加右键菜单
  */
 async function addContextMenus(contextMenuType = 1) {
@@ -221,38 +234,80 @@ async function addContextMenus(contextMenuType = 1) {
 
   switch (contextMenuType) {
     case 1:
-      browser.contextMenus.create({
-        id: CMD_TOGGLE_TRANSLATE,
-        title: browser.i18n.getMessage("app_name"),
-        contexts: ["page", "selection"],
-      });
+      try {
+        browser.contextMenus.create(
+          {
+            id: CMD_TOGGLE_TRANSLATE,
+            title: browser.i18n.getMessage("app_name"),
+            contexts: ["page", "selection"],
+          },
+          handleContextMenuError
+        );
+      } catch (err) {
+        kissLog("create contextMenu exception:", err);
+      }
       break;
     case 2:
-      browser.contextMenus.create({
-        id: CMD_TOGGLE_TRANSLATE,
-        title: browser.i18n.getMessage("toggle_translate"),
-        contexts: ["page", "selection"],
-      });
-      browser.contextMenus.create({
-        id: CMD_TOGGLE_STYLE,
-        title: browser.i18n.getMessage("toggle_style"),
-        contexts: ["page", "selection"],
-      });
-      browser.contextMenus.create({
-        id: CMD_OPEN_TRANBOX,
-        title: browser.i18n.getMessage("open_tranbox"),
-        contexts: ["page", "selection"],
-      });
-      browser.contextMenus.create({
-        id: "options_separator",
-        type: "separator",
-        contexts: ["page", "selection"],
-      });
-      browser.contextMenus.create({
-        id: CMD_OPEN_OPTIONS,
-        title: browser.i18n.getMessage("open_options"),
-        contexts: ["page", "selection"],
-      });
+      try {
+        browser.contextMenus.create(
+          {
+            id: CMD_TOGGLE_TRANSLATE,
+            title: browser.i18n.getMessage("toggle_translate"),
+            contexts: ["page", "selection"],
+          },
+          handleContextMenuError
+        );
+      } catch (err) {
+        kissLog("create contextMenu exception:", err);
+      }
+      try {
+        browser.contextMenus.create(
+          {
+            id: CMD_TOGGLE_STYLE,
+            title: browser.i18n.getMessage("toggle_style"),
+            contexts: ["page", "selection"],
+          },
+          handleContextMenuError
+        );
+      } catch (err) {
+        kissLog("create contextMenu exception:", err);
+      }
+      try {
+        browser.contextMenus.create(
+          {
+            id: CMD_OPEN_TRANBOX,
+            title: browser.i18n.getMessage("open_tranbox"),
+            contexts: ["page", "selection"],
+          },
+          handleContextMenuError
+        );
+      } catch (err) {
+        kissLog("create contextMenu exception:", err);
+      }
+      try {
+        browser.contextMenus.create(
+          {
+            id: "options_separator",
+            type: "separator",
+            contexts: ["page", "selection"],
+          },
+          handleContextMenuError
+        );
+      } catch (err) {
+        kissLog("create contextMenu exception:", err);
+      }
+      try {
+        browser.contextMenus.create(
+          {
+            id: CMD_OPEN_OPTIONS,
+            title: browser.i18n.getMessage("open_options"),
+            contexts: ["page", "selection"],
+          },
+          handleContextMenuError
+        );
+      } catch (err) {
+        kissLog("create contextMenu exception:", err);
+      }
       break;
     default:
   }
